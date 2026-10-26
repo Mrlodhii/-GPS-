@@ -3,76 +3,178 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phone Number Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phone Info Tool</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      background: #08110c;
-      color: white;
+      margin: 0;
+      padding: 18px;
+      background: #080d0a;
+      color: #fff;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
     }
-    .box {
-      max-width: 400px;
-      margin: 50px auto;
-      padding: 25px;
-      background: #14231a;
-      border-radius: 15px;
+    .card {
+      max-width: 450px;
+      margin: 35px auto;
+      padding: 22px;
+      background: #142019;
+      border: 1px solid #31523b;
+      border-radius: 18px;
     }
-    input, button {
+    h1 { color: #53ff75; font-size: 27px; }
+    p { line-height: 1.6; color: #d2ded5; }
+    label { display: block; margin-top: 17px; }
+    input, select, button {
       width: 100%;
-      box-sizing: border-box;
-      padding: 14px;
-      margin-top: 15px;
-      border-radius: 8px;
+      padding: 13px;
+      margin-top: 8px;
+      border-radius: 9px;
       font-size: 16px;
     }
-    input { border: 1px solid #53ff75; }
+    input, select {
+      background: #fff;
+      color: #111;
+      border: 1px solid #8aab92;
+    }
     button {
       background: #53ff75;
-      border: none;
+      color: #08110c;
+      border: 0;
       font-weight: bold;
+      cursor: pointer;
     }
-    #result { margin-top: 20px; overflow-wrap: anywhere; }
+    .secondary {
+      background: #263a2b;
+      color: white;
+      border: 1px solid #53ff75;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 14px;
+      background: #0b140e;
+      border-radius: 10px;
+      overflow-wrap: anywhere;
+      line-height: 1.8;
+    }
+    a { color: #75ff91; }
+    .note { font-size: 13px; color: #b8c8bc; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2>📱 Phone Number Checker</h2>
-    <p>भारतीय मोबाइल नंबर डालें</p>
+  <main class="card">
+    <h1>📱 Phone Info Tool</h1>
+    <p>Country code और फोन नंबर का सामान्य format जाँचें।</p>
 
-    <input id="phone" type="tel"
-      placeholder="उदाहरण: 9876543210"
-      maxlength="13">
+    <label for="country">Country चुनें</label>
+    <select id="country">
+      <option value="IN" data-code="+91">India (+91)</option>
+      <option value="US" data-code="+1">United States (+1)</option>
+      <option value="GB" data-code="+44">United Kingdom (+44)</option>
+      <option value="CA" data-code="+1">Canada (+1)</option>
+      <option value="AU" data-code="+61">Australia (+61)</option>
+      <option value="NP" data-code="+977">Nepal (+977)</option>
+      <option value="BD" data-code="+880">Bangladesh (+880)</option>
+      <option value="AE" data-code="+971">United Arab Emirates (+971)</option>
+    </select>
+
+    <label for="phone">Phone Number</label>
+    <input id="phone" type="tel" inputmode="tel"
+      placeholder="फोन नंबर लिखें">
 
     <button onclick="checkNumber()">Check Number</button>
+    <button class="secondary" onclick="searchPublic()">
+      Search Public Web
+    </button>
 
-    <div id="result"></div>
-  </div>
+    <div id="result" aria-live="polite">
+      यहाँ परिणाम दिखाई देगा।
+    </div>
+
+    <p class="note">
+      Privacy: अपना या किसी अन्य व्यक्ति का नंबर सार्वजनिक वेबसाइटों पर
+      खोजने से पहले अनुमति लें। यह टूल GPS location या निजी जानकारी
+      प्राप्त नहीं करता।
+    </p>
+  </main>
 
   <script>
-    function checkNumber() {
+    const countries = {
+      IN: { name: "India", code: "+91", min: 10, max: 10 },
+      US: { name: "United States", code: "+1", min: 10, max: 10 },
+      GB: { name: "United Kingdom", code: "+44", min: 10, max: 10 },
+      CA: { name: "Canada", code: "+1", min: 10, max: 10 },
+      AU: { name: "Australia", code: "+61", min: 9, max: 9 },
+      NP: { name: "Nepal", code: "+977", min: 10, max: 10 },
+      BD: { name: "Bangladesh", code: "+880", min: 10, max: 10 },
+      AE: { name: "United Arab Emirates", code: "+971", min: 9, max: 9 }
+    };
+
+    function getDetails() {
+      const region = document.getElementById("country").value;
+      const country = countries[region];
       const raw = document.getElementById("phone").value.trim();
+      const digits = raw.replace(/[\s()-]/g, "");
       const result = document.getElementById("result");
 
-      const phone = raw.replace(/[\s-]/g, "");
-      const valid = /^(?:\+91)?[6-9]\d{9}$/.test(phone);
-
-      if (!valid) {
-        result.textContent =
-          "कृपया सही 10 अंकों का भारतीय मोबाइल नंबर डालें।";
-        return;
+      if (!digits || !/^\+?\d+$/.test(digits)) {
+        result.textContent = "कृपया सही तरीके से नंबर लिखें।";
+        return null;
       }
 
-      const number = phone.replace(/^\+91/, "");
+      let national = digits;
 
-      result.innerHTML =
-        "<p>✅ नंबर का प्रारूप सही है।</p>" +
-        "<p>Country: India (+91)</p>" +
-        "<p>Digits: 10</p>" +
-        "<p>ध्यान दें: इससे मालिक या Live Location की पुष्टि नहीं होती।</p>";
+      if (digits.startsWith("+")) {
+        if (!digits.startsWith(country.code)) {
+          result.textContent =
+            "दर्ज नंबर का country code आपके चुने हुए देश से मेल नहीं खाता।";
+          return null;
+        }
+        national = digits.slice(country.code.length);
+      } else if (
+        digits.startsWith(country.code.slice(1)) &&
+        digits.length > country.max
+      ) {
+        national = digits.slice(country.code.length - 1);
+      }
+
+      if (
+        national.length < country.min ||
+        national.length > country.max
+      ) {
+        result.textContent =
+          "नंबर की लंबाई चुने हुए देश के सामान्य format से मेल नहीं खाती।";
+        return null;
+      }
+
+      return { country, national, region };
+    }
+
+    function checkNumber() {
+      const data = getDetails();
+      if (!data) return;
+
+      document.getElementById("result").textContent =
+        "Format check पास हुआ।\n" +
+        "Country: " + data.country.name + "\n" +
+        "Country Code: " + data.country.code + "\n" +
+        "Digits entered: " + data.national.length + "\n\n" +
+        "ध्यान दें: इससे नंबर का सक्रिय होना, मालिक की पहचान, " +
+        "carrier या वास्तविक location प्रमाणित नहीं होती।";
+    }
+
+    function searchPublic() {
+      const data = getDetails();
+      if (!data) return;
+
+      const fullNumber = data.country.code + data.national;
+      const url =
+        "https://www.google.com/search?q=" +
+        encodeURIComponent('"' + fullNumber + '"');
+
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   </script>
 </body>
 </html>
+
