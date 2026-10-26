@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Number Checker</title>
+  <style>
+    body {
+      background: #08110c;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .box {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 25px;
+      background: #14231a;
+      border-radius: 15px;
+    }
+    input, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      margin-top: 15px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    input { border: 1px solid #53ff75; }
+    button {
+      background: #53ff75;
+      border: none;
+      font-weight: bold;
+    }
+    #result { margin-top: 20px; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>📱 Phone Number Checker</h2>
+    <p>भारतीय मोबाइल नंबर डालें</p>
+
+    <input id="phone" type="tel"
+      placeholder="उदाहरण: 9876543210"
+      maxlength="13">
+
+    <button onclick="checkNumber()">Check Number</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function checkNumber() {
+      const raw = document.getElementById("phone").value.trim();
+      const result = document.getElementById("result");
+
+      const phone = raw.replace(/[\s-]/g, "");
+      const valid = /^(?:\+91)?[6-9]\d{9}$/.test(phone);
+
+      if (!valid) {
+        result.textContent =
+          "कृपया सही 10 अंकों का भारतीय मोबाइल नंबर डालें।";
+        return;
+      }
+
+      const number = phone.replace(/^\+91/, "");
+
+      result.innerHTML =
+        "<p>✅ नंबर का प्रारूप सही है।</p>" +
+        "<p>Country: India (+91)</p>" +
+        "<p>Digits: 10</p>" +
+        "<p>ध्यान दें: इससे मालिक या Live Location की पुष्टि नहीं होती।</p>";
+    }
+  </script>
+</body>
+</html>
